@@ -3,594 +3,784 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cron Expression Builder</title>
+    <title>Cron Expression Generator</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #e0e7ff;
+            --text-color: #1f2937;
+            --background: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
         h1 {
             text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
         }
-        
-        .container {
-            background-color: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
         }
-        
-        .tabs {
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
             display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
-        
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            border-bottom: none;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
+
+        .form-field {
+            flex: 1;
+            min-width: 200px;
         }
-        
-        .tab.active {
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 1rem;
             background-color: white;
-            border-bottom: 1px solid white;
-            font-weight: bold;
-            color: #3498db;
         }
-        
+
+        select:focus, input:focus {
+            outline: 2px solid var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .expression {
+            flex: 1;
+            padding: 1rem;
+            background-color: var(--primary-light);
+            border-radius: 0.375rem;
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+
+        .copy-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f3f4f6;
+            border-radius: 0.375rem;
+        }
+
+        .tab {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 0.5rem;
         }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
+
+        .tooltip-icon {
+            color: var(--primary-color);
+            font-size: 0.875rem;
             font-weight: bold;
+            width: 1rem;
+            height: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--primary-color);
+            border-radius: 50%;
         }
-        
-        select, input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: normal;
+            font-size: 0.8rem;
         }
-        
-        .result-container {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f8f8f8;
-            border-radius: 4px;
-            border-left: 4px solid #3498db;
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
-        
-        .result {
-            font-family: monospace;
-            font-size: 20px;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .explanation {
-            background-color: #e8f4fc;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-        }
-        
-        .preset-container {
-            margin-bottom: 20px;
-        }
-        
-        .preset-btn {
-            margin: 5px;
-            padding: 8px 12px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .preset-btn:hover {
-            background-color: #2980b9;
-        }
-        
-        .field-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .field {
-            flex: 1 1 150px;
+
+        @media (max-width: 768px) {
+            .form-field {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Cron Expression Builder</h1>
+        <h1>Cron Expression Generator</h1>
         
-        <div class="tabs">
-            <div class="tab active" data-tab="simple">Simple Mode</div>
-            <div class="tab" data-tab="advanced">Advanced Mode</div>
-            <div class="tab" data-tab="presets">Common Presets</div>
-        </div>
-        
-        <div class="tab-content active" id="simple">
-            <div class="field-container">
-                <div class="field">
-                    <label for="minute">Minute:</label>
-                    <select id="minute">
-                        <option value="*">Every minute (*)</option>
-                        <option value="0">At minute 0 (0)</option>
-                        <option value="5">At minute 5 (5)</option>
-                        <option value="10">At minute 10 (10)</option>
-                        <option value="15">At minute 15 (15)</option>
-                        <option value="20">At minute 20 (20)</option>
-                        <option value="25">At minute 25 (25)</option>
-                        <option value="30">At minute 30 (30)</option>
-                        <option value="35">At minute 35 (35)</option>
-                        <option value="40">At minute 40 (40)</option>
-                        <option value="45">At minute 45 (45)</option>
-                        <option value="50">At minute 50 (50)</option>
-                        <option value="55">At minute 55 (55)</option>
-                        <option value="0/5">Every 5 minutes (0/5)</option>
-                        <option value="0/10">Every 10 minutes (0/10)</option>
-                        <option value="0/15">Every 15 minutes (0/15)</option>
-                        <option value="0/30">Every 30 minutes (0/30)</option>
+        <div class="card">
+            <div class="tab">
+                <button class="tab-btn active" data-tab="simple">Simple Mode</button>
+                <button class="tab-btn" data-tab="advanced">Advanced Mode</button>
+            </div>
+            
+            <div id="simple-tab" class="tab-content active">
+                <div class="form-group">
+                    <label>Schedule Type</label>
+                    <select id="schedule-type" class="schedule-select">
+                        <option value="once">Run once at specific time</option>
+                        <option value="daily">Run daily</option>
+                        <option value="weekly">Run weekly</option>
+                        <option value="monthly">Run monthly</option>
+                        <option value="yearly">Run yearly</option>
+                        <option value="interval">Run at interval</option>
                     </select>
                 </div>
                 
-                <div class="field">
-                    <label for="hour">Hour:</label>
-                    <select id="hour">
-                        <option value="*">Every hour (*)</option>
-                        <option value="0">At midnight (0)</option>
-                        <option value="1">At 1 AM (1)</option>
-                        <option value="2">At 2 AM (2)</option>
-                        <option value="3">At 3 AM (3)</option>
-                        <option value="4">At 4 AM (4)</option>
-                        <option value="5">At 5 AM (5)</option>
-                        <option value="6">At 6 AM (6)</option>
-                        <option value="7">At 7 AM (7)</option>
-                        <option value="8">At 8 AM (8)</option>
-                        <option value="9">At 9 AM (9)</option>
-                        <option value="10">At 10 AM (10)</option>
-                        <option value="11">At 11 AM (11)</option>
-                        <option value="12">At noon (12)</option>
-                        <option value="13">At 1 PM (13)</option>
-                        <option value="14">At 2 PM (14)</option>
-                        <option value="15">At 3 PM (15)</option>
-                        <option value="16">At 4 PM (16)</option>
-                        <option value="17">At 5 PM (17)</option>
-                        <option value="18">At 6 PM (18)</option>
-                        <option value="19">At 7 PM (19)</option>
-                        <option value="20">At 8 PM (20)</option>
-                        <option value="21">At 9 PM (21)</option>
-                        <option value="22">At 10 PM (22)</option>
-                        <option value="23">At 11 PM (23)</option>
-                        <option value="*/2">Every 2 hours (*/2)</option>
-                        <option value="*/3">Every 3 hours (*/3)</option>
-                        <option value="*/4">Every 4 hours (*/4)</option>
-                        <option value="*/6">Every 6 hours (*/6)</option>
-                        <option value="*/12">Every 12 hours (*/12)</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="field-container">
-                <div class="field">
-                    <label for="day">Day of Month:</label>
-                    <select id="day">
-                        <option value="*">Every day (*)</option>
-                        <option value="1">Day 1 (1)</option>
-                        <option value="2">Day 2 (2)</option>
-                        <option value="3">Day 3 (3)</option>
-                        <option value="4">Day 4 (4)</option>
-                        <option value="5">Day 5 (5)</option>
-                        <option value="10">Day 10 (10)</option>
-                        <option value="15">Day 15 (15)</option>
-                        <option value="20">Day 20 (20)</option>
-                        <option value="25">Day 25 (25)</option>
-                        <option value="L">Last day of month (L)</option>
-                    </select>
+                <!-- Once at specific time -->
+                <div id="once-options" class="schedule-options">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Date</label>
+                            <input type="date" id="once-date">
+                        </div>
+                        <div class="form-field time-field">
+                            <label>Time</label>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <input type="number" id="once-hour" min="1" max="12" placeholder="Hour">
+                                </div>
+                                <div class="form-field">
+                                    <input type="number" id="once-minute" min="0" max="59" placeholder="Minute">
+                                </div>
+                                <div class="form-field">
+                                    <select id="once-ampm">
+                                        <option value="am">AM</option>
+                                        <option value="pm">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="field">
-                    <label for="month">Month:</label>
-                    <select id="month">
-                        <option value="*">Every month (*)</option>
-                        <option value="1">January (1)</option>
-                        <option value="2">February (2)</option>
-                        <option value="3">March (3)</option>
-                        <option value="4">April (4)</option>
-                        <option value="5">May (5)</option>
-                        <option value="6">June (6)</option>
-                        <option value="7">July (7)</option>
-                        <option value="8">August (8)</option>
-                        <option value="9">September (9)</option>
-                        <option value="10">October (10)</option>
-                        <option value="11">November (11)</option>
-                        <option value="12">December (12)</option>
-                        <option value="*/3">Every 3 months (*/3)</option>
-                        <option value="*/6">Every 6 months (*/6)</option>
-                    </select>
+                <!-- Daily options -->
+                <div id="daily-options" class="schedule-options" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-field time-field">
+                            <label>Time</label>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <input type="number" id="daily-hour" min="1" max="12" placeholder="Hour">
+                                </div>
+                                <div class="form-field">
+                                    <input type="number" id="daily-minute" min="0" max="59" placeholder="Minute">
+                                </div>
+                                <div class="form-field">
+                                    <select id="daily-ampm">
+                                        <option value="am">AM</option>
+                                        <option value="pm">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Weekly options -->
+                <div id="weekly-options" class="schedule-options" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Day of Week</label>
+                            <select id="week-day">
+                                <option value="0">Sunday</option>
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                            </select>
+                        </div>
+                        <div class="form-field time-field">
+                            <label>Time</label>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <input type="number" id="weekly-hour" min="1" max="12" placeholder="Hour">
+                                </div>
+                                <div class="form-field">
+                                    <input type="number" id="weekly-minute" min="0" max="59" placeholder="Minute">
+                                </div>
+                                <div class="form-field">
+                                    <select id="weekly-ampm">
+                                        <option value="am">AM</option>
+                                        <option value="pm">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Monthly options -->
+                <div id="monthly-options" class="schedule-options" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Day of Month</label>
+                            <input type="number" id="month-day" min="1" max="31" placeholder="1-31">
+                        </div>
+                        <div class="form-field time-field">
+                            <label>Time</label>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <input type="number" id="monthly-hour" min="1" max="12" placeholder="Hour">
+                                </div>
+                                <div class="form-field">
+                                    <input type="number" id="monthly-minute" min="0" max="59" placeholder="Minute">
+                                </div>
+                                <div class="form-field">
+                                    <select id="monthly-ampm">
+                                        <option value="am">AM</option>
+                                        <option value="pm">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Yearly options -->
+                <div id="yearly-options" class="schedule-options" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Month</label>
+                            <select id="year-month">
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Day of Month</label>
+                            <input type="number" id="year-day" min="1" max="31" placeholder="1-31">
+                        </div>
+                        <div class="form-field time-field">
+                            <label>Time</label>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <input type="number" id="yearly-hour" min="1" max="12" placeholder="Hour">
+                                </div>
+                                <div class="form-field">
+                                    <input type="number" id="yearly-minute" min="0" max="59" placeholder="Minute">
+                                </div>
+                                <div class="form-field">
+                                    <select id="yearly-ampm">
+                                        <option value="am">AM</option>
+                                        <option value="pm">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interval options -->
+                <div id="interval-options" class="schedule-options" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label>Every</label>
+                            <input type="number" id="interval-value" min="1" placeholder="Number">
+                        </div>
+                        <div class="form-field">
+                            <label>Unit</label>
+                            <select id="interval-unit">
+                                <option value="minute">Minutes</option>
+                                <option value="hour">Hours</option>
+                                <option value="day">Days</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="field-container">
-                <div class="field">
-                    <label for="weekday">Day of Week:</label>
-                    <select id="weekday">
-                        <option value="*">Every day (*)</option>
-                        <option value="0">Sunday (0)</option>
-                        <option value="1">Monday (1)</option>
-                        <option value="2">Tuesday (2)</option>
-                        <option value="3">Wednesday (3)</option>
-                        <option value="4">Thursday (4)</option>
-                        <option value="5">Friday (5)</option>
-                        <option value="6">Saturday (6)</option>
-                        <option value="1-5">Monday to Friday (1-5)</option>
-                        <option value="0,6">Weekends (0,6)</option>
-                    </select>
+            <div id="advanced-tab" class="tab-content">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Minutes 
+                            <span class="tooltip">
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">0-59 or * for any</span>
+                            </span>
+                        </label>
+                        <input type="text" id="adv-minute" placeholder="0-59">
+                    </div>
+                    <div class="form-field">
+                        <label>Hours 
+                            <span class="tooltip">
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">0-23 or * for any</span>
+                            </span>
+                        </label>
+                        <input type="text" id="adv-hour" placeholder="0-23">
+                    </div>
                 </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Day of Month 
+                            <span class="tooltip">
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">1-31 or * for any</span>
+                            </span>
+                        </label>
+                        <input type="text" id="adv-dom" placeholder="1-31">
+                    </div>
+                    <div class="form-field">
+                        <label>Month 
+                            <span class="tooltip">
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">1-12 or * for any</span>
+                            </span>
+                        </label>
+                        <input type="text" id="adv-month" placeholder="1-12">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Day of Week 
+                            <span class="tooltip">
+                                <span class="tooltip-icon">?</span>
+                                <span class="tooltip-text">0-6 (Sunday=0) or * for any</span>
+                            </span>
+                        </label>
+                        <input type="text" id="adv-dow" placeholder="0-6">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 2rem;">
+                <button id="generate-btn" class="btn">Generate Cron Expression</button>
             </div>
         </div>
         
-        <div class="tab-content" id="advanced">
-            <div class="field-container">
-                <div class="field">
-                    <label for="adv-minute">Minute (0-59):</label>
-                    <input type="text" id="adv-minute" placeholder="E.g., * or 0/5 or 1,10,20">
-                </div>
-                
-                <div class="field">
-                    <label for="adv-hour">Hour (0-23):</label>
-                    <input type="text" id="adv-hour" placeholder="E.g., * or */2 or 9-17">
-                </div>
+        <div class="result-card" style="display: none;" id="result-section">
+            <h2>Your Cron Expression</h2>
+            <div class="result-box">
+                <div class="expression" id="cron-result">* * * * *</div>
+                <button id="copy-btn" class="copy-btn">Copy</button>
             </div>
-            
-            <div class="field-container">
-                <div class="field">
-                    <label for="adv-day">Day of Month (1-31):</label>
-                    <input type="text" id="adv-day" placeholder="E.g., * or 1,15 or L">
-                </div>
-                
-                <div class="field">
-                    <label for="adv-month">Month (1-12):</label>
-                    <input type="text" id="adv-month" placeholder="E.g., * or 3-5 or */3">
-                </div>
-            </div>
-            
-            <div class="field-container">
-                <div class="field">
-                    <label for="adv-weekday">Day of Week (0-6):</label>
-                    <input type="text" id="adv-weekday" placeholder="E.g., * or MON-FRI or 2#1">
-                </div>
-            </div>
-        </div>
-        
-        <div class="tab-content" id="presets">
-            <h3>Common Cron Presets</h3>
-            <div class="preset-container">
-                <button class="preset-btn" data-cron="0 0 * * *">Daily at midnight</button>
-                <button class="preset-btn" data-cron="0 12 * * *">Daily at noon</button>
-                <button class="preset-btn" data-cron="0 0 * * 1">Weekly on Monday</button>
-                <button class="preset-btn" data-cron="0 0 1 * *">Monthly on the 1st</button>
-                <button class="preset-btn" data-cron="0 0 1 1 *">Yearly on Jan 1</button>
-                <button class="preset-btn" data-cron="0 9 * * 1-5">Weekdays at 9 AM</button>
-                <button class="preset-btn" data-cron="0 0 * * 0,6">Weekends at midnight</button>
-                <button class="preset-btn" data-cron="0 */3 * * *">Every 3 hours</button>
-                <button class="preset-btn" data-cron="*/15 * * * *">Every 15 minutes</button>
-                <button class="preset-btn" data-cron="0 8-17 * * 1-5">Hourly 8 AM-5 PM weekdays</button>
-                <button class="preset-btn" data-cron="0 0 L * *">Last day of month at midnight</button>
-                <button class="preset-btn" data-cron="0 12 15 * *">15th of month at noon</button>
-                <button class="preset-btn" data-cron="0 0 * */3 *">First day of quarter at midnight</button>
-            </div>
-        </div>
-        
-        <div class="result-container">
-            <h3>Generated Cron Expression:</h3>
-            <div class="result" id="cron-result">* * * * *</div>
-            <div class="explanation" id="cron-explanation">
-                This expression will run every minute of every hour of every day.
-            </div>
+            <div class="explanation" id="cron-explanation"></div>
         </div>
     </div>
 
     <script>
-        // Tab handling
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Update active content
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === tabId) {
-                        content.classList.add('active');
-                    }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                    
+                    // Add active class to the clicked button and its content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab') + '-tab';
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Schedule type selection
+            const scheduleSelect = document.getElementById('schedule-type');
+            const scheduleOptions = document.querySelectorAll('.schedule-options');
+            
+            scheduleSelect.addEventListener('change', function() {
+                // Hide all schedule options
+                scheduleOptions.forEach(option => {
+                    option.style.display = 'none';
                 });
                 
-                updateCronExpression();
+                // Show the selected option
+                const selectedOption = document.getElementById(this.value + '-options');
+                if (selectedOption) {
+                    selectedOption.style.display = 'block';
+                }
             });
-        });
-        
-        // Simple mode
-        const minuteSelect = document.getElementById('minute');
-        const hourSelect = document.getElementById('hour');
-        const daySelect = document.getElementById('day');
-        const monthSelect = document.getElementById('month');
-        const weekdaySelect = document.getElementById('weekday');
-        
-        // Advanced mode
-        const advMinuteInput = document.getElementById('adv-minute');
-        const advHourInput = document.getElementById('adv-hour');
-        const advDayInput = document.getElementById('adv-day');
-        const advMonthInput = document.getElementById('adv-month');
-        const advWeekdayInput = document.getElementById('adv-weekday');
-        
-        // Preset buttons
-        const presetButtons = document.querySelectorAll('.preset-btn');
-        
-        // Result elements
-        const cronResult = document.getElementById('cron-result');
-        const cronExplanation = document.getElementById('cron-explanation');
-        
-        // Event listeners for simple mode
-        minuteSelect.addEventListener('change', updateCronExpression);
-        hourSelect.addEventListener('change', updateCronExpression);
-        daySelect.addEventListener('change', updateCronExpression);
-        monthSelect.addEventListener('change', updateCronExpression);
-        weekdaySelect.addEventListener('change', updateCronExpression);
-        
-        // Event listeners for advanced mode
-        advMinuteInput.addEventListener('input', updateCronExpression);
-        advHourInput.addEventListener('input', updateCronExpression);
-        advDayInput.addEventListener('input', updateCronExpression);
-        advMonthInput.addEventListener('input', updateCronExpression);
-        advWeekdayInput.addEventListener('input', updateCronExpression);
-        
-        // Event listeners for presets
-        presetButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const cronValue = button.getAttribute('data-cron');
-                const [minute, hour, day, month, weekday] = cronValue.split(' ');
+            
+            // Generate button click
+            const generateBtn = document.getElementById('generate-btn');
+            
+            generateBtn.addEventListener('click', function() {
+                let cronExpression = '';
+                let explanation = '';
                 
-                // Update advanced inputs
-                advMinuteInput.value = minute;
-                advHourInput.value = hour;
-                advDayInput.value = day;
-                advMonthInput.value = month;
-                advWeekdayInput.value = weekday;
+                // Check if we're in simple or advanced mode
+                const isSimpleMode = document.getElementById('simple-tab').classList.contains('active');
                 
-                // Try to update simple selects if possible
-                try {
-                    minuteSelect.value = minute;
-                } catch(e) {
-                    minuteSelect.value = "*";
-                }
-                
-                try {
-                    hourSelect.value = hour;
-                } catch(e) {
-                    hourSelect.value = "*";
-                }
-                
-                try {
-                    daySelect.value = day;
-                } catch(e) {
-                    daySelect.value = "*";
-                }
-                
-                try {
-                    monthSelect.value = month;
-                } catch(e) {
-                    monthSelect.value = "*";
-                }
-                
-                try {
-                    weekdaySelect.value = weekday;
-                } catch(e) {
-                    weekdaySelect.value = "*";
-                }
-                
-                // Switch to the presets tab
-                tabs.forEach(t => t.classList.remove('active'));
-                document.querySelector('[data-tab="presets"]').classList.add('active');
-                
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === 'presets') {
-                        content.classList.add('active');
+                if (isSimpleMode) {
+                    const scheduleType = document.getElementById('schedule-type').value;
+                    
+                    switch (scheduleType) {
+                        case 'once':
+                            cronExpression = generateOnceExpression();
+                            explanation = "This cron will run once at the specified date and time.";
+                            break;
+                        case 'daily':
+                            cronExpression = generateDailyExpression();
+                            explanation = "This cron will run daily at the specified time.";
+                            break;
+                        case 'weekly':
+                            cronExpression = generateWeeklyExpression();
+                            explanation = "This cron will run weekly on the specified day at the specified time.";
+                            break;
+                        case 'monthly':
+                            cronExpression = generateMonthlyExpression();
+                            explanation = "This cron will run monthly on the specified day at the specified time.";
+                            break;
+                        case 'yearly':
+                            cronExpression = generateYearlyExpression();
+                            explanation = "This cron will run yearly on the specified date at the specified time.";
+                            break;
+                        case 'interval':
+                            cronExpression = generateIntervalExpression();
+                            explanation = "This cron will run at the specified interval.";
+                            break;
                     }
+                } else {
+                    // Advanced mode
+                    const minute = document.getElementById('adv-minute').value || '*';
+                    const hour = document.getElementById('adv-hour').value || '*';
+                    const dom = document.getElementById('adv-dom').value || '*';
+                    const month = document.getElementById('adv-month').value || '*';
+                    const dow = document.getElementById('adv-dow').value || '*';
+                    
+                    cronExpression = `${minute} ${hour} ${dom} ${month} ${dow}`;
+                    explanation = generateExplanation(minute, hour, dom, month, dow);
+                }
+                
+                // Display the result
+                document.getElementById('cron-result').textContent = cronExpression;
+                document.getElementById('cron-explanation').textContent = explanation;
+                document.getElementById('result-section').style.display = 'block';
+            });
+            
+            // Copy button
+            const copyBtn = document.getElementById('copy-btn');
+            
+            copyBtn.addEventListener('click', function() {
+                const cronExpression = document.getElementById('cron-result').textContent;
+                navigator.clipboard.writeText(cronExpression).then(() => {
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = 'Copied!';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
                 });
-                
-                updateCronExpression();
             });
+            
+            // Helper functions
+            function convertTo24Hour(hour, ampm) {
+                hour = parseInt(hour);
+                
+                if (ampm === 'pm' && hour < 12) {
+                    return hour + 12;
+                }
+                
+                if (ampm === 'am' && hour === 12) {
+                    return 0;
+                }
+                
+                return hour;
+            }
+            
+            function generateOnceExpression() {
+                const dateInput = document.getElementById('once-date').value;
+                if (!dateInput) return '* * * * *';
+                
+                const date = new Date(dateInput);
+                const day = date.getDate();
+                const month = date.getMonth() + 1;
+                
+                const hour = document.getElementById('once-hour').value;
+                const minute = document.getElementById('once-minute').value;
+                const ampm = document.getElementById('once-ampm').value;
+                
+                if (!hour || !minute) return '* * * * *';
+                
+                const hour24 = convertTo24Hour(hour, ampm);
+                
+                return `${minute} ${hour24} ${day} ${month} *`;
+            }
+            
+            function generateDailyExpression() {
+                const hour = document.getElementById('daily-hour').value;
+                const minute = document.getElementById('daily-minute').value;
+                const ampm = document.getElementById('daily-ampm').value;
+                
+                if (!hour || !minute) return '* * * * *';
+                
+                const hour24 = convertTo24Hour(hour, ampm);
+                
+                return `${minute} ${hour24} * * *`;
+            }
+            
+            function generateWeeklyExpression() {
+                const dayOfWeek = document.getElementById('week-day').value;
+                const hour = document.getElementById('weekly-hour').value;
+                const minute = document.getElementById('weekly-minute').value;
+                const ampm = document.getElementById('weekly-ampm').value;
+                
+                if (!hour || !minute) return '* * * * *';
+                
+                const hour24 = convertTo24Hour(hour, ampm);
+                
+                return `${minute} ${hour24} * * ${dayOfWeek}`;
+            }
+            
+            function generateMonthlyExpression() {
+                const dayOfMonth = document.getElementById('month-day').value;
+                const hour = document.getElementById('monthly-hour').value;
+                const minute = document.getElementById('monthly-minute').value;
+                const ampm = document.getElementById('monthly-ampm').value;
+                
+                if (!dayOfMonth || !hour || !minute) return '* * * * *';
+                
+                const hour24 = convertTo24Hour(hour, ampm);
+                
+                return `${minute} ${hour24} ${dayOfMonth} * *`;
+            }
+            
+            function generateYearlyExpression() {
+                const month = document.getElementById('year-month').value;
+                const day = document.getElementById('year-day').value;
+                const hour = document.getElementById('yearly-hour').value;
+                const minute = document.getElementById('yearly-minute').value;
+                const ampm = document.getElementById('yearly-ampm').value;
+                
+                if (!day || !hour || !minute) return '* * * * *';
+                
+                const hour24 = convertTo24Hour(hour, ampm);
+                
+                return `${minute} ${hour24} ${day} ${month} *`;
+            }
+            
+            function generateIntervalExpression() {
+                const value = parseInt(document.getElementById('interval-value').value);
+                const unit = document.getElementById('interval-unit').value;
+                
+                if (!value) return '* * * * *';
+                
+                switch (unit) {
+                    case 'minute':
+                        return value === 1 ? '* * * * *' : `*/${value} * * * *`;
+                    case 'hour':
+                        return value === 1 ? '0 * * * *' : `0 */${value} * * *`;
+                    case 'day':
+                        return value === 1 ? '0 0 * * *' : `0 0 */${value} * *`;
+                    default:
+                        return '* * * * *';
+                }
+            }
+            
+            function generateExplanation(minute, hour, dom, month, dow) {
+                let explanation = "This cron will run ";
+                
+                // Minute
+                if (minute === '*') {
+                    explanation += "every minute ";
+                } else if (minute.includes('/')) {
+                    const interval = minute.split('/')[1];
+                    explanation += `every ${interval} minutes `;
+                } else {
+                    explanation += `at minute ${minute} `;
+                }
+                
+                // Hour
+                if (hour === '*') {
+                    explanation += "of every hour ";
+                } else if (hour.includes('/')) {
+                    const interval = hour.split('/')[1];
+                    explanation += `every ${interval} hours `;
+                } else {
+                    // Try to convert to 12-hour format
+                    let hour12 = parseInt(hour);
+                    let ampm = "AM";
+                    
+                    if (hour12 >= 12) {
+                        ampm = "PM";
+                        if (hour12 > 12) {
+                            hour12 -= 12;
+                        }
+                    }
+                    
+                    if (hour12 === 0) {
+                        hour12 = 12;
+                    }
+                    
+                    explanation += `at ${hour12}:${minute === '*' ? '00' : minute} ${ampm} `;
+                }
+                
+                // Day of month
+                if (dom === '*') {
+                    // Don't add anything
+                } else if (dom.includes('/')) {
+                    const interval = dom.split('/')[1];
+                    explanation += `every ${interval} days `;
+                } else {
+                    explanation += `on day ${dom} `;
+                }
+                
+                // Month
+                if (month === '*') {
+                    // Don't add anything
+                } else if (month.includes('/')) {
+                    const interval = month.split('/')[1];
+                    explanation += `every ${interval} months `;
+                } else {
+                    const monthNames = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
+                    explanation += `in ${monthNames[parseInt(month) - 1]} `;
+                }
+                
+                // Day of week
+                if (dow === '*') {
+                    // Don't add anything
+                } else {
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    
+                    if (dow.includes('-')) {
+                        const [start, end] = dow.split('-');
+                        explanation += `from ${days[parseInt(start)]} to ${days[parseInt(end)]} `;
+                    } else if (dow.includes(',')) {
+                        const daysList = dow.split(',').map(d => days[parseInt(d)]).join(', ');
+                        explanation += `on ${daysList} `;
+                    } else {
+                        explanation += `on ${days[parseInt(dow)]} `;
+                    }
+                }
+                
+                return explanation.trim() + ".";
+            }
+            
+            // Initialize the UI
+            scheduleSelect.dispatchEvent(new Event('change'));
         });
-        
-        function updateCronExpression() {
-            let minute, hour, day, month, weekday;
-            
-            // Get the active tab
-            const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
-            
-            if (activeTab === 'simple' || activeTab === 'presets') {
-                minute = minuteSelect.value;
-                hour = hourSelect.value;
-                day = daySelect.value;
-                month = monthSelect.value;
-                weekday = weekdaySelect.value;
-            } else if (activeTab === 'advanced') {
-                minute = advMinuteInput.value || '*';
-                hour = advHourInput.value || '*';
-                day = advDayInput.value || '*';
-                month = advMonthInput.value || '*';
-                weekday = advWeekdayInput.value || '*';
-            }
-            
-            const cronExpression = `${minute} ${hour} ${day} ${month} ${weekday}`;
-            cronResult.textContent = cronExpression;
-            
-            // Generate explanation
-            cronExplanation.innerHTML = generateExplanation(minute, hour, day, month, weekday);
-        }
-        
-        function generateExplanation(minute, hour, day, month, weekday) {
-            let explanation = "This cron expression will run ";
-            
-            // Minute explanation
-            if (minute === '*') {
-                explanation += "every minute";
-            } else if (minute.includes('/')) {
-                const [start, step] = minute.split('/');
-                explanation += `every ${step} minutes`;
-                if (start !== '0') {
-                    explanation += ` starting at minute ${start}`;
-                }
-            } else if (minute.includes('-')) {
-                const [start, end] = minute.split('-');
-                explanation += `every minute from minute ${start} to ${end}`;
-            } else if (minute.includes(',')) {
-                explanation += `at minutes ${minute.replace(/,/g, ', ')}`;
-            } else {
-                explanation += `at minute ${minute}`;
-            }
-            
-            // Hour explanation
-            if (hour === '*') {
-                explanation += " of every hour";
-            } else if (hour.includes('/')) {
-                const [start, step] = hour.split('/');
-                explanation += ` of every ${step} hours`;
-                if (start !== '0') {
-                    explanation += ` starting at hour ${start}`;
-                }
-            } else if (hour.includes('-')) {
-                const [start, end] = hour.split('-');
-                explanation += ` between ${formatHour(start)} and ${formatHour(end)}`;
-            } else if (hour.includes(',')) {
-                const hours = hour.split(',').map(h => formatHour(h)).join(', ');
-                explanation += ` at ${hours}`;
-            } else {
-                explanation += ` at ${formatHour(hour)}`;
-            }
-            
-            // Day of month explanation
-            if (day === '*' && weekday === '*') {
-                explanation += " every day";
-            } else if (day !== '*' && weekday === '*') {
-                if (day === 'L') {
-                    explanation += " on the last day of the month";
-                } else if (day.includes('/')) {
-                    const [start, step] = day.split('/');
-                    explanation += ` every ${step} days`;
-                    if (start !== '0') {
-                        explanation += ` starting on day ${start}`;
-                    }
-                } else if (day.includes('-')) {
-                    const [start, end] = day.split('-');
-                    explanation += ` on days ${start} to ${end} of the month`;
-                } else if (day.includes(',')) {
-                    explanation += ` on days ${day.replace(/,/g, ', ')} of the month`;
-                } else {
-                    explanation += ` on day ${day} of the month`;
-                }
-            }
-            
-            // Day of week explanation
-            if (weekday !== '*' && day === '*') {
-                if (weekday === '1-5') {
-                    explanation += " on weekdays (Monday to Friday)";
-                } else if (weekday === '0,6') {
-                    explanation += " on weekends (Saturday and Sunday)";
-                } else if (weekday.includes('-')) {
-                    const [start, end] = weekday.split('-');
-                    explanation += ` on ${formatWeekday(start)} to ${formatWeekday(end)}`;
-                } else if (weekday.includes(',')) {
-                    const days = weekday.split(',').map(d => formatWeekday(d)).join(' and ');
-                    explanation += ` on ${days}`;
-                } else {
-                    explanation += ` on ${formatWeekday(weekday)}`;
-                }
-            }
-            
-            // Month explanation
-            if (month !== '*') {
-                if (month.includes('/')) {
-                    const [start, step] = month.split('/');
-                    explanation += ` every ${step} months`;
-                    if (start !== '0') {
-                        explanation += ` starting in ${formatMonth(start)}`;
-                    }
-                } else if (month.includes('-')) {
-                    const [start, end] = month.split('-');
-                    explanation += ` from ${formatMonth(start)} to ${formatMonth(end)}`;
-                } else if (month.includes(',')) {
-                    const months = month.split(',').map(m => formatMonth(m)).join(', ');
-                    explanation += ` in ${months}`;
-                } else {
-                    explanation += ` in ${formatMonth(month)}`;
-                }
-            }
-            
-            explanation += ".";
-            
-            return explanation;
-        }
-        
-        function formatHour(hour) {
-            const h = parseInt(hour);
-            if (h === 0) return "midnight";
-            if (h === 12) return "noon";
-            if (h < 12) return `${h} AM`;
-            return `${h-12} PM`;
-        }
-        
-        function formatWeekday(day) {
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            return days[parseInt(day)];
-        }
-        
-        function formatMonth(month) {
-            const months = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            return months[parseInt(month)];
-        }
-        
-        // Initialize
-        updateCronExpression();
     </script>
 </body>
 </html>
